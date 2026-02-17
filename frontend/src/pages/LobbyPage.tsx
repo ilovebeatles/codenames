@@ -61,7 +61,16 @@ export default function LobbyPage() {
   const inviteLink = `${window.location.origin}/room/${roomID}`;
 
   const copyLink = () => {
-    navigator.clipboard.writeText(inviteLink);
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(inviteLink);
+    } else {
+      const input = document.createElement('input');
+      input.value = inviteLink;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      document.body.removeChild(input);
+    }
   };
 
   return (
