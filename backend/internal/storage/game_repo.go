@@ -92,6 +92,13 @@ func (r *GameRepo) RevealCard(ctx context.Context, cardID string, revealedBy mod
 	return err
 }
 
+func (r *GameRepo) Deactivate(ctx context.Context, gameID string) error {
+	_, err := r.pool.Exec(ctx, `
+		UPDATE games SET phase = 'lobby' WHERE id = $1
+	`, gameID)
+	return err
+}
+
 func (r *GameRepo) SetFinished(ctx context.Context, gameID string, winner model.Team) error {
 	_, err := r.pool.Exec(ctx, `
 		UPDATE games SET phase = 'finished', winner = $2 WHERE id = $1

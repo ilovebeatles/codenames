@@ -41,6 +41,8 @@ export interface RoomState {
   players: Player[];
   game: Game | null;
   cards: CardView[];
+  red_cards_left: number;
+  blue_cards_left: number;
 }
 
 export interface WSMessage {

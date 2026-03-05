@@ -7,6 +7,8 @@ import Board from '../components/Board';
 import ClueInput from '../components/ClueInput';
 import ClueDisplay from '../components/ClueDisplay';
 import GameOverBanner from '../components/GameOverBanner';
+import JoinTeamModal from '../components/JoinTeamModal';
+import type { Team } from '../types';
 
 export default function GamePage() {
   const { roomID } = useParams<{ roomID: string }>();
@@ -53,8 +55,14 @@ export default function GamePage() {
   const teamColor = game?.current_team === 'red' ? '#d32f2f' : '#1976d2';
   const teamName = game?.current_team === 'red' ? 'Красные' : 'Синие';
 
-  const redRemaining = cards.filter((c) => c.card_type === 'red' && !c.revealed).length;
-  const blueRemaining = cards.filter((c) => c.card_type === 'blue' && !c.revealed).length;
+  const redRemaining = roomState?.red_cards_left
+  const blueRemaining = roomState?.blue_cards_left
+
+  const needsTeam = currentPlayer && !currentPlayer.team;
+
+  const handleJoinTeam = (team: Team) => {
+    send({ type: 'join_team', team, role: 'operative' });
+  };
 
   const handleGiveClue = (clue: string, number: number) => {
     send({ type: 'give_clue', clue, number });
@@ -76,6 +84,10 @@ export default function GamePage() {
 
   return (
     <div className="game-page">
+      {needsTeam && game.phase === 'playing' && (
+        <JoinTeamModal players={players} onJoin={handleJoinTeam} />
+      )}
+
       {game.phase === 'finished' && (
         <GameOverBanner winner={game.winner} onNewGame={handleNewGame} />
       )}

@@ -16,15 +16,12 @@ export default function LobbyPage() {
   const error = useGameStore((s) => s.error);
   const clearError = useGameStore((s) => s.clearError);
   const [joined, setJoined] = useState(false);
-  const [showNameModal, setShowNameModal] = useState(false);
+  const showNameModal = !playerName;
   const { send } = useWebSocket(joined ? roomID : undefined);
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
-    if (!playerName) {
-      setShowNameModal(true);
-      return;
-    }
-    if (!roomID || joined) return;
+    if (!playerName || !roomID || joined) return;
     joinRoom(roomID, playerName).then(() => setJoined(true)).catch(() => {
       alert('Failed to join room');
     });
@@ -39,7 +36,6 @@ export default function LobbyPage() {
 
   const handleNameSubmit = (name: string) => {
     setPlayerName(name);
-    setShowNameModal(false);
   };
 
   const handleJoinTeam = (team: Team) => {
@@ -71,7 +67,20 @@ export default function LobbyPage() {
       document.execCommand('copy');
       document.body.removeChild(input);
     }
+    setCopied(true)
   };
+
+  useEffect(() => {
+    let timerId: ReturnType<typeof setTimeout> | undefined
+
+    if (copied) {
+      timerId = setTimeout(() => {
+        setCopied(false)
+      }, 2000)
+    }
+
+    return () => clearTimeout(timerId)
+  }, [copied, setCopied])
 
   return (
     <div className="lobby">
@@ -80,7 +89,7 @@ export default function LobbyPage() {
 
       <div className="invite-link">
         <input type="text" value={inviteLink} readOnly />
-        <button onClick={copyLink}>Копировать</button>
+        <button disabled={copied} onClick={copyLink}>{copied ? 'Скопировано ✅' : 'Копировать'}</button>
       </div>
 
       {error && (

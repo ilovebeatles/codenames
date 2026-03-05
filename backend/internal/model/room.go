@@ -44,6 +44,8 @@ type RoomState struct {
 	Players []Player `json:"players"`
 	Game    *Game    `json:"game"`
 	Cards   []CardView `json:"cards"`
+	RedCardsLeft  int `json:"red_cards_left"`
+	BlueCardsLeft int `json:"blue_cards_left"`
 }
 
 // CardView is what the client sees — card_type may be hidden for operatives.

@@ -454,6 +454,54 @@ body {
   opacity: 0.4;
 }
 
+/* Join Team Modal */
+.join-team-modal {
+  text-align: center;
+}
+
+.join-team-options {
+  display: flex;
+  gap: 1rem;
+}
+
+.join-team-btn {
+  flex: 1;
+  padding: 1.5rem 1rem;
+  border: 3px solid;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  transition: transform 0.1s;
+}
+
+.join-team-btn:hover {
+  transform: scale(1.05);
+}
+
+.join-team-red {
+  border-color: #d32f2f;
+  color: #d32f2f;
+}
+
+.join-team-blue {
+  border-color: #1976d2;
+  color: #1976d2;
+}
+
+.join-team-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.join-team-count {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
 .loading {
   text-align: center;
   padding: 3rem;

@@ -1,4 +1,4 @@
-.PHONY: up down build logs dev-backend dev-frontend prod prod-down prod-logs
+.PHONY: up down build logs dev dev-backend dev-frontend prod prod-down prod-logs
 
 up:
 	docker compose up --build -d
@@ -11,6 +11,10 @@ build:
 
 logs:
 	docker compose logs -f
+
+dev:
+	docker compose up postgres -d
+	trap 'kill 0' SIGINT; make dev-backend & make dev-frontend & wait
 
 dev-backend:
 	cd backend && go run ./cmd/server

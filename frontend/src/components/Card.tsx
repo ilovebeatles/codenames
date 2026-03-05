@@ -7,17 +7,18 @@ interface Props {
 }
 
 const TYPE_COLORS: Record<string, string> = {
-  red: '#d32f2f',
-  blue: '#1976d2',
-  neutral: '#bdbdbd',
-  assassin: '#212121',
+  red: '#e74c3c',
+  blue: '#3498db',
+  neutral: '#bdc3c7',
+  assassin: '#2c3e50',
 };
 
 export default function Card({ card, onClick, disabled }: Props) {
+  const opacity = card.card_type === 'assassin' ? '99' : '30'
   const bgColor = card.revealed
     ? TYPE_COLORS[card.card_type] || '#f5f5f5'
     : card.card_type && !card.revealed
-      ? `${TYPE_COLORS[card.card_type]}30` // spymaster hint
+      ? `${TYPE_COLORS[card.card_type]}${opacity}` // spymaster hint
       : '#f5f5f5';
 
   const textColor = card.revealed && (card.card_type === 'assassin' || card.card_type === 'red' || card.card_type === 'blue')

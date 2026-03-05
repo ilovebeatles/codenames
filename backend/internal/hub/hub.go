@@ -231,6 +231,12 @@ func (h *Hub) handleEndGuessing(ctx context.Context, client *Client) {
 }
 
 func (h *Hub) handleNewGame(ctx context.Context, client *Client) {
+	// Deactivate the finished game so it's no longer returned by GetActiveByRoomID
+	activeGame, err := h.gameRepo.GetActiveByRoomID(ctx, client.roomID)
+	if err == nil {
+		_ = h.gameRepo.Deactivate(ctx, activeGame.ID)
+	}
+
 	// Reset the game state — go back to lobby
 	if err := h.playerRepo.ResetTeamsAndRoles(ctx, client.roomID); err != nil {
 		client.SendError("failed to reset")
@@ -276,9 +282,20 @@ func (h *Hub) broadcastRoomState(ctx context.Context, roomID string) {
 
 		// Build card views
 		var cardViews []model.CardView
+		var blueCardsLeft int
+		var redCardsLeft int
+
 		for _, c := range cards {
 			showType := isSpymaster || g.Phase == model.PhaseFinished
 			cardViews = append(cardViews, model.CardToView(c, showType))
+
+			if !c.Revealed && c.CardType == model.CardTypeBlue {
+				blueCardsLeft++
+			}
+
+			if !c.Revealed && c.CardType == model.CardTypeRed {
+				redCardsLeft++
+			}
 		}
 
 		state := &model.RoomState{
@@ -286,6 +303,8 @@ func (h *Hub) broadcastRoomState(ctx context.Context, roomID string) {
 			Players: players,
 			Game:    g,
 			Cards:   cardViews,
+			RedCardsLeft:  redCardsLeft,
+      		BlueCardsLeft: blueCardsLeft,
 		}
 
 		data, err := json.Marshal(OutgoingMessage{Type: MsgRoomState, State: state})
