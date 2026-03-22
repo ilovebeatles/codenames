@@ -98,6 +98,10 @@ func (e *Engine) GiveClue(ctx context.Context, game model.Game, clue string, num
 		game.GuessesLeft = number + 1
 	}
 
+	if err := e.gameRepo.CreateClueHistoryEntry(ctx, game.ID, game.CurrentTeam, clue, number); err != nil {
+		return game, err
+	}
+
 	if err := e.gameRepo.Update(ctx, game); err != nil {
 		return game, err
 	}

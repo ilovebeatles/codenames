@@ -36,6 +36,15 @@ export interface CardView {
   revealed_by: Team;
 }
 
+export interface ClueHistoryEntry {
+  id: string;
+  game_id: string;
+  team: Team;
+  clue: string;
+  number: number;
+  created_at: string;
+}
+
 export interface RoomState {
   room: Room;
   players: Player[];
@@ -43,6 +52,8 @@ export interface RoomState {
   cards: CardView[];
   red_cards_left: number;
   blue_cards_left: number;
+  red_clue_history: ClueHistoryEntry[];
+  blue_clue_history: ClueHistoryEntry[];
 }
 
 export interface WSMessage {

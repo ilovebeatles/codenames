@@ -260,10 +260,14 @@ func (h *Hub) broadcastRoomState(ctx context.Context, roomID string) {
 
 	var g *model.Game
 	var cards []model.Card
+	var redClueHistory []model.ClueHistoryEntry
+	var blueClueHistory []model.ClueHistoryEntry
 	activeGame, err := h.gameRepo.GetActiveByRoomID(ctx, roomID)
 	if err == nil {
 		g = &activeGame
 		cards, _ = h.gameRepo.GetCardsByGameID(ctx, activeGame.ID)
+		clueHistory, _ := h.gameRepo.GetClueHistoryByGameID(ctx, activeGame.ID)
+		redClueHistory, blueClueHistory = model.SplitClueHistoryByTeam(clueHistory)
 	}
 
 	h.mu.RLock()
@@ -299,12 +303,14 @@ func (h *Hub) broadcastRoomState(ctx context.Context, roomID string) {
 		}
 
 		state := &model.RoomState{
-			Room:    room,
-			Players: players,
-			Game:    g,
-			Cards:   cardViews,
-			RedCardsLeft:  redCardsLeft,
-      		BlueCardsLeft: blueCardsLeft,
+			Room:            room,
+			Players:         players,
+			Game:            g,
+			Cards:           cardViews,
+			RedCardsLeft:    redCardsLeft,
+			BlueCardsLeft:   blueCardsLeft,
+			RedClueHistory:  redClueHistory,
+			BlueClueHistory: blueClueHistory,
 		}
 
 		data, err := json.Marshal(OutgoingMessage{Type: MsgRoomState, State: state})

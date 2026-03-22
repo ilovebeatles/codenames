@@ -38,14 +38,25 @@ type Card struct {
 	RevealedBy Team     `json:"revealed_by"`
 }
 
+type ClueHistoryEntry struct {
+	ID        string    `json:"id"`
+	GameID    string    `json:"game_id"`
+	Team      Team      `json:"team"`
+	Clue      string    `json:"clue"`
+	Number    int       `json:"number"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 // RoomState is the full state sent to clients via WebSocket.
 type RoomState struct {
-	Room    Room     `json:"room"`
-	Players []Player `json:"players"`
-	Game    *Game    `json:"game"`
-	Cards   []CardView `json:"cards"`
-	RedCardsLeft  int `json:"red_cards_left"`
-	BlueCardsLeft int `json:"blue_cards_left"`
+	Room            Room               `json:"room"`
+	Players         []Player           `json:"players"`
+	Game            *Game              `json:"game"`
+	Cards           []CardView         `json:"cards"`
+	RedCardsLeft    int                `json:"red_cards_left"`
+	BlueCardsLeft   int                `json:"blue_cards_left"`
+	RedClueHistory  []ClueHistoryEntry `json:"red_clue_history"`
+	BlueClueHistory []ClueHistoryEntry `json:"blue_clue_history"`
 }
 
 // CardView is what the client sees — card_type may be hidden for operatives.
@@ -70,4 +81,20 @@ func CardToView(c Card, showType bool) CardView {
 		cv.CardType = c.CardType
 	}
 	return cv
+}
+
+func SplitClueHistoryByTeam(entries []ClueHistoryEntry) ([]ClueHistoryEntry, []ClueHistoryEntry) {
+	red := make([]ClueHistoryEntry, 0, len(entries))
+	blue := make([]ClueHistoryEntry, 0, len(entries))
+
+	for _, entry := range entries {
+		switch entry.Team {
+		case TeamRed:
+			red = append(red, entry)
+		case TeamBlue:
+			blue = append(blue, entry)
+		}
+	}
+
+	return red, blue
 }

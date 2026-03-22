@@ -43,24 +43,41 @@ func (h *RoomHandler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var game *model.Game
+	var rawCards []model.Card
+	var redCardsLeft int
+	var blueCardsLeft int
+	var redClueHistory []model.ClueHistoryEntry
+	var blueClueHistory []model.ClueHistoryEntry
 	g, err := h.gameRepo.GetActiveByRoomID(r.Context(), id)
 	if err == nil {
 		game = &g
+		rawCards, _ = h.gameRepo.GetCardsByGameID(r.Context(), game.ID)
+		clueHistory, _ := h.gameRepo.GetClueHistoryByGameID(r.Context(), game.ID)
+		redClueHistory, blueClueHistory = model.SplitClueHistoryByTeam(clueHistory)
 	}
 
 	var cards []model.CardView
 	if game != nil {
-		rawCards, _ := h.gameRepo.GetCardsByGameID(r.Context(), game.ID)
 		for _, c := range rawCards {
 			cards = append(cards, model.CardToView(c, false))
+			if !c.Revealed && c.CardType == model.CardTypeRed {
+				redCardsLeft++
+			}
+			if !c.Revealed && c.CardType == model.CardTypeBlue {
+				blueCardsLeft++
+			}
 		}
 	}
 
 	state := model.RoomState{
-		Room:    room,
-		Players: players,
-		Game:    game,
-		Cards:   cards,
+		Room:            room,
+		Players:         players,
+		Game:            game,
+		Cards:           cards,
+		RedCardsLeft:    redCardsLeft,
+		BlueCardsLeft:   blueCardsLeft,
+		RedClueHistory:  redClueHistory,
+		BlueClueHistory: blueClueHistory,
 	}
 	writeJSON(w, http.StatusOK, state)
 }

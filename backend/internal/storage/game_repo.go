@@ -105,3 +105,37 @@ func (r *GameRepo) SetFinished(ctx context.Context, gameID string, winner model.
 	`, gameID, winner)
 	return err
 }
+
+func (r *GameRepo) CreateClueHistoryEntry(ctx context.Context, gameID string, team model.Team, clue string, number int) error {
+	_, err := r.pool.Exec(ctx, `
+		INSERT INTO clue_history (game_id, team, clue, number)
+		VALUES ($1, $2, $3, $4)
+	`, gameID, team, clue, number)
+	if err != nil {
+		return fmt.Errorf("create clue history entry: %w", err)
+	}
+	return nil
+}
+
+func (r *GameRepo) GetClueHistoryByGameID(ctx context.Context, gameID string) ([]model.ClueHistoryEntry, error) {
+	rows, err := r.pool.Query(ctx, `
+		SELECT id, game_id, team, clue, number, created_at
+		FROM clue_history
+		WHERE game_id = $1
+		ORDER BY created_at ASC, id ASC
+	`, gameID)
+	if err != nil {
+		return nil, fmt.Errorf("get clue history: %w", err)
+	}
+	defer rows.Close()
+
+	var entries []model.ClueHistoryEntry
+	for rows.Next() {
+		var entry model.ClueHistoryEntry
+		if err := rows.Scan(&entry.ID, &entry.GameID, &entry.Team, &entry.Clue, &entry.Number, &entry.CreatedAt); err != nil {
+			return nil, err
+		}
+		entries = append(entries, entry)
+	}
+	return entries, nil
+}
